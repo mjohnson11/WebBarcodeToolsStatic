@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DNA Barcode Parser</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+  <h1>DNA Barcode Parser</h1>
+</header>
+
+<div class="layout">
+
+  <!-- ── Left panel: controls ──────────────────────────────────────── -->
+  <aside class="sidebar">
+
+    <section class="section">
+      <h2>Construct sequence</h2>
+      <div class="radio-group">
+        <label><input type="radio" name="construct-src" value="text" checked> Enter text</label>
+        <label><input type="radio" name="construct-src" value="fasta"> Upload FASTA</label>
+      </div>
+
+      <div id="construct-text-wrap">
+        <textarea id="construct-input" rows="5" spellcheck="false" placeholder="Enter construct sequence…"></textarea>
+        <p class="hint">Named regions: <code>(name:NNNNN)</code>. Or use autodetect below.</p>
+      </div>
+
+      <div id="construct-fasta-wrap" hidden>
+        <input type="file" id="fasta-upload" accept=".fa,.fasta,.txt">
+        <p class="hint" id="fasta-hint">No file selected — using Barseq default.</p>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>FASTQ file</h2>
+      <input type="file" id="fastq-upload" accept=".fastq,.fq,.gz">
+    </section>
+
+    <details class="section options-details">
+      <summary>Parsing options</summary>
+
+      <label class="opt-row">
+        <input type="checkbox" id="opt-autodetect" checked>
+        Autodetect barcodes (N/W/S runs)
+      </label>
+
+      <label class="opt-row">
+        Flanking sequence length
+        <input type="number" id="opt-flanking" value="8" min="4" max="20" class="num-input">
+      </label>
+
+      <label class="opt-row">
+        <input type="checkbox" id="opt-broad" checked>
+        Broad search (try reverse complement)
+      </label>
+
+      <label class="opt-row">
+        <input type="checkbox" id="opt-trim">
+        Trim read start (bases)
+        <input type="number" id="opt-trim-val" value="10" min="1" max="500" class="num-input" disabled>
+      </label>
+
+      <div class="opt-row">
+        <label for="opt-unknown-lens">Unknown region lengths</label>
+        <select id="opt-unknown-lens">
+          <option value="defined">Use defined lengths</option>
+          <option value="all">All variable length</option>
+        </select>
+      </div>
+
+      <label class="opt-row">
+        <input type="checkbox" id="opt-limit">
+        Limit reads parsed
+        <input type="number" id="opt-limit-val" value="100000" min="1000" step="10000" class="num-input" disabled>
+      </label>
+    </details>
+
+    <button id="parse-btn" class="primary-btn" disabled>&#9654; Parse</button>
+    <p class="hint" id="parse-hint">Upload a FASTQ file to enable parsing.</p>
+
+    <div id="progress-wrap" hidden>
+      <div class="progress-bar"><div id="progress-fill"></div></div>
+      <p id="progress-label" class="hint"></p>
+    </div>
+
+  </aside>
+
+  <!-- ── Right panel: results ──────────────────────────────────────── -->
+  <main id="results" hidden>
+
+    <div id="stat-cards" class="stat-cards"></div>
+
+    <section id="region-stats-section" hidden>
+      <h2>Per-region stats</h2>
+      <table id="region-stats-table" class="data-table"></table>
+    </section>
+
+    <section>
+      <h2>Top barcode combinations</h2>
+      <p class="hint">Click a row to inspect sample reads for that barcode.</p>
+      <div class="table-wrap">
+        <table id="bc-table" class="data-table bc-table"></table>
+      </div>
+      <div class="table-footer">
+        <span id="bc-table-caption" class="hint"></span>
+        <button id="csv-download-btn" class="secondary-btn">&#8659; Download CSV</button>
+      </div>
+    </section>
+
+    <section id="unmapped-section" hidden>
+      <hr>
+      <details id="unmapped-details">
+        <summary id="unmapped-summary"></summary>
+        <p class="hint">Showing first 50. Barcode regions that could not be found are marked <span style="color:#c0392b;">not found</span>.</p>
+        <div id="unmapped-reads"></div>
+        <div class="dl-row">
+          <label>Reads to export
+            <input type="number" id="unmapped-export-n" value="100" min="1" class="num-input">
+          </label>
+          <button id="fastq-download-btn" class="secondary-btn">&#8659; Download unmapped FASTQ</button>
+        </div>
+      </details>
+    </section>
+
+    <p id="error-msg" class="error-msg" hidden></p>
+  </main>
+
+</div>
+
+<!-- ── Read-sample modal ─────────────────────────────────────────────── -->
+<dialog id="sample-modal">
+  <div class="modal-header">
+    <span id="modal-title"></span>
+    <button id="modal-close" class="close-btn">&times;</button>
+  </div>
+  <div id="modal-body"></div>
+</dialog>
+
+<script type="module" src="js/app.js"></script>
+</body>
+</html>
